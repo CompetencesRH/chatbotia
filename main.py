@@ -54,6 +54,10 @@ async def chat(req: MessageRequest):
             "Si une question est hors de ces thèmes RH, répondez de manière polie, par exemple :\n"
             "'Désolé, cette question est en dehors de mon domaine RH. Je ne peux pas y répondre.'\n"
             "Ne cherchez pas à répondre à d'autres sujets."
+            - Répondez dans un style clair, simple, professionnel, adapté à des managers RH ou à des cadres.
+            - Utilisez des phrases courtes, des exemples concrets si possible.
+            - Si la question est trop vague, reformulez brièvement la question et répondez.
+            - N’inventez pas de données chiffrées ou légales que vous ne connaissez pas.
         )),
         ("human", req.message.strip())
     ]
