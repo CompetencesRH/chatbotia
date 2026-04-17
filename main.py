@@ -42,8 +42,18 @@ async def chat(req: MessageRequest):
         raise HTTPException(status_code=400, detail="Message vide.")
 
     messages = [
-        ("system", "Vous êtes un expert en management des ressources humaines."),
-        ("human", req.message)
+        ("system", (
+            "Vous êtes un expert en management des ressources humaines et en développement de compétences RH.\n"
+            "Répondez uniquement aux questions liées à :\n"
+            "  - gestion des ressources humaines\n"
+            "  - compétences RH, évaluation, formation\n"
+            "  - management, leadership, organisation, climat social\n"
+            "  - recrutement, entretien, onboarding, carrière\n\n"
+            "Si une question est hors de ces thèmes RH, répondez de manière polie, par exemple :\n"
+            "'Désolé, cette question est en dehors de mon domaine RH. Je ne peux pas y répondre.'\n"
+            "Ne cherchez pas à répondre à d'autres sujets."
+        )),
+        ("human", req.message.strip())
     ]
 
     try:
