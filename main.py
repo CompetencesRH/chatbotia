@@ -3,68 +3,43 @@ from pydantic import BaseModel
 from langchain_groq import ChatGroq
 from fastapi.middleware.cors import CORSMiddleware
 import os
-
+import uvicorn
 
 app = FastAPI()
 
-# --- CORS ---
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://www.competencesrh.fr"],
-    allow_methods=["POST"],
-    allow_headers=["Content-Type"],
+    allow_origins=["https://competencesrh.fr", "https://www.competencesrh.fr"],
+    allow_methods=["*"],
+    allow_headers=["*"]
 )
 
-
-# --- Chat ---
 class MessageRequest(BaseModel):
     message: str
-
-
-@app.options("/chat")
-def options_chat():
-    return {}
-
 
 llm = ChatGroq(
     model="llama-3.1-8b-instant",
     temperature=0.7,
-    max_tokens=None,
-    timeout=None,
-    max_retries=2,
     api_key=os.getenv("GROQ_API_KEY")
 )
-
 
 @app.post("/chat")
 async def chat(req: MessageRequest):
     if not req.message.strip():
         raise HTTPException(status_code=400, detail="Message vide.")
-
+    
     messages = [
-    ("system", (
-        "Vous êtes un expert en management des ressources humaines et en développement de compétences RH.\n"
-        "Répondez uniquement aux questions liées à :\n"
-        "  - IA, LLM\n"
-        "  - Transparence salariale\n"
-        "  - gestion des ressources humaines\n"
-        "  - compétences RH, évaluation, formation\n"
-        "  - management, leadership, organisation, climat social\n"
-        "  - recrutement, entretien, onboarding, carrière\n\n"
-        "Si une question est hors de ces thèmes RH, répondez de manière polie, par exemple :\n"
-        "'Désolé, cette question est en dehors de mon domaine RH. Je ne peux pas y répondre.'\n"
-        "Ne cherchez pas à répondre à d'autres sujets.\n\n"
-        "Répondez dans un style clair, simple, professionnel, adapté à des managers RH ou à des cadres.\n"
-        "Utilisez des phrases courtes, des exemples concrets si possible.\n"
-        "Si la question est trop vague, reformulez brièvement la question et répondez.\n"
-        "N’inventez pas de données chiffrées ou juridiques que vous ne connaissez pas."
-    )),
-    ("human", req.message.strip())
-]
-result = llm.invoke(messages)
-
+        ("system", """Expert RH : IA, compétences, management, recrutement.
+Répondez UNIQUEMENT RH. Style pro, clair, concret."""), 
+        ("human", req.message.strip())
+    ]
+    
     try:
         result = llm.invoke(messages)
         return {"response": result.content}
     except Exception as e:
-        return {"response": "Erreur du serveur LLM.", "error": str(e)}
+        return {"response": f"Erreur LLM : {str(e)[:100]}"}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
