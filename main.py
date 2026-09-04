@@ -19,7 +19,7 @@ class MessageRequest(BaseModel):
     message: str
 
 llm = ChatGroq(
-    model="llama-3.1-8b-instant",
+    model="groq/compound",
     temperature=0.7,
     api_key=os.getenv("GROQ_API_KEY")
 )
